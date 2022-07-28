@@ -43,82 +43,40 @@ for i in range(len(data)-1):
 
 # Read csv file into data frame
 df = pd.read_csv('vskp_data.csv')
+df['date'] = pd.to_datetime(df['date'])
 
-# Update maximum temperature
-try:
-    i=0
-    param = 'MaxTemp'
-    str = cols[i]
-    n=len(str)
-    paramdate = datetime.strptime(str[n-9:n-1],'%d/%m/%y')
-    value = values[i]
-    if is_number(value):
-        df = df.append({'obsdate':paramdate, 'param':param, 'value':value}, ignore_index=True)
-except:
-    pass
+# Update data frame
+# date
+date = date.today()
 
-# Update minimum temperature
-try:
-    i=2
-    param = 'MinTemp'
-    str = cols[i]
-    n=len(str)
-    paramdate = datetime.strptime(str[n-9:n-1],'%d/%m/%y')
-    value = values[i]
-    if is_number(value):
-        df = df.append({'obsdate':paramdate, 'param':param, 'value':value}, ignore_index=True)
-except:
-    pass
+# maxTemp
+if is_number(values[0]):
+    maxTemp = values[0]
 
+# minTemp
+if is_number(values[2]):
+    minTemp = values[2]
 
-# Update precipitation
-try:
-    i=4
-    param = 'precip'
-    str = cols[i]
-    n=len(str)
-    paramdate = date.today()-timedelta(days=1)
-    value = values[i]
-    if is_number(value):
-        df = df.append({'obsdate':paramdate, 'param':param, 'value':value}, ignore_index=True)
-except:
-    pass
+# mornRH
+if is_number(values[5]):
+    mornRH = values[5]
 
-# Update morning relative humidity
-try:
-    i=5
-    param = 'RH'
-    str = cols[i]
-    n=len(str)
-    pdate = date.today()
-    pdate = pdate.strftime('%d/%m/%y')
-    x = re.search('Humidity at\s',str)
-    ptime = str[x.end():x.end()+4]
-    pdate = pdate+":"+ptime
-    paramdate = datetime.strptime(pdate,'%d/%m/%y:%H%M')
-    value = values[i]
-    if is_number(value):
-        df = df.append({'obsdate':paramdate, 'param':param, 'value':value}, ignore_index=True)
-except:
-    pass
+# eveRH
+if is_number(values[6]):
+    eveRH = values[6]
+    
+# meanRH
+meanRH = (int(mornRH)+int(eveRH))/2
 
-# Update evening relative humidity
-try:
-    i=6
-    param = 'RH'
-    str = cols[i]
-    n=len(str)
-    pdate = date.today()
-    pdate = pdate.strftime('%d/%m/%y')
-    x = re.search('Humidity at\s',str)
-    ptime = str[x.end():x.end()+4]
-    pdate = pdate+":"+ptime
-    paramdate = datetime.strptime(pdate,'%d/%m/%y:%H%M')
-    value = values[i]
-    if is_number(value):
-        df = df.append({'obsdate':paramdate, 'param':param, 'value':value}, ignore_index=True)
-except:
-    pass
+# precip
+if is_number(values[4]):
+    precip = values[4]
+elif values[4] == 'NIL':
+    precip = 0
+print(precip)    
+df = df.append({'date':date, 'maxTemp':maxTemp, 'minTemp':minTemp, 'mornRH':mornRH, 'eveRH':eveRH, 'meanRH':meanRH}, ignore_index=True)
+if df[df['date']== date-timedelta(days=1)]['date'].count()==1:
+    df.loc[df['date']== date-timedelta(days=1), 'precip'] =  precip
 
 # Write csv file
 df.to_csv('vskp_data.csv',index=False)
