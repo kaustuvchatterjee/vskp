@@ -102,7 +102,7 @@ try:
 except:
     pass
 
-# Update morning relative humidity
+# Update evening relative humidity
 try:
     i=6
     param = 'RH'
