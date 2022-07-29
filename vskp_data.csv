@@ -1,2 +1,2 @@
-date,maxTemp,minTemp,mornRH,eveRH,relHum,rainFall,meanRH
-2022-07-28,34.0,27.2,67,69,,,68.0
+date,maxTemp,minTemp,mornRH,eveRH,relHum,rainFall
+2022-07-28,34.0,27.2,67,69,68.0,
