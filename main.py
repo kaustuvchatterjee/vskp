@@ -146,87 +146,87 @@ plt.xlabel('Date', fontsize=12,)
 st.pyplot(fig2, dpi=300)
 
 tz = 'Asia/Calcutta'
-try:
-    # Doppler Radar Plot
-    url = 'https://mausam.imd.gov.in/Radar/sri_vsk.gif'
-    img1 = io.imread(url)
-    img1_shape = np.shape(img1)
-    # Satellite image (water vapor)
-    url = 'https://mausam.imd.gov.in/Satellite/3Dasiasec_wv.jpg'
-    img2 = io.imread(url)
-    
+#try:
+# Doppler Radar Plot
+url = 'https://mausam.imd.gov.in/Radar/sri_vsk.gif'
+img1 = io.imread(url)
+img1_shape = np.shape(img1)
+# Satellite image (water vapor)
+url = 'https://mausam.imd.gov.in/Satellite/3Dasiasec_wv.jpg'
+img2 = io.imread(url)
 
-    # Extract Date/Time
-    img1_dt = img1[25:45,520:688,:]
-    img2_dt = img2[30:50,510:790,:]
-    try:
-        local_tz = pytz.timezone(tz)
-        text = pytesseract.image_to_string(img1_dt)
-        dp_datetime = datetime.strptime(text.strip(),'%H:%M / %d-%b-%Y')
-        dp_datetime = dp_datetime.replace(tzinfo=pytz.utc).astimezone(local_tz)
-        dp_datetime = datetime.strftime(dp_datetime,'%d %b %Y %H:%M IST')
-        
-    except:
-        dp_datetime = "NA"
-    
-    try:
-        text = pytesseract.image_to_string(img2_dt).strip()
-        text = text[:10]+' '+text[20:24]
-        sat_datetime = datetime.strptime(text.strip(),'%d-%m-%Y %H%M')
-        sat_datetime = datetime.strftime(sat_datetime,'%d %b %Y %H:%M IST')
-    
-    except:
-        sat_datetime = "NA"
-        
-     
-    # Crop
-    
-    
-    img1 = img1[:, 0:500, 0:3]
-    x1 = 730
-    x2 = x1+41
-    y1 = 762
-    y2 = y1+41
-    img2 = img2[x1:x2,y1:y2,:]
-    img2 = resize(img2,(500,500))
-    
-    mask = np.load('mask_vsk.npy')
-    element = np.ones([31,31],np.uint8)
-    mask = dilation(mask,element)
-    masked = np.where(mask[...,None], img2, 0)
-    
-    result = img2.copy()
-    result[mask>0]=(0,0,0)
-    img2_gray = rgb2gray(result)
-    img2_gray = inpaint.inpaint_biharmonic(img2_gray,mask)
-    img2_gray = filters.gaussian(img2_gray,sigma=1)
-    alpha = img2_gray
-    
-    dpimg = img1
-    dp_dt = img1_dt
-    sat_dt = img2_dt
-    #Plot
-    bbox=dict(boxstyle="square", alpha=0.3, color='white')
-    fig3, ax = plt.subplots(figsize=[15,15])
-    ax.set(xticks=[], yticks=[], title="Visakhapatnam Doppler Radar Image Overlayed with Satellite Image")
-    plt.imshow(dpimg)
-    plt.imshow(img2_gray, cmap='Blues_r', alpha=alpha*0.8)
-    
-    plt.annotate('Radar:      '+dp_datetime,(364,14),size=11, color = 'k', fontweight='semibold', bbox=bbox)
-    plt.annotate('Satellite:  '+sat_datetime,(364,24),size=11, color = 'k', fontweight='semibold', bbox=bbox) 
-    
-    # dpin = ax.inset_axes([360,2,70,12],transform=ax.transData)    # create new inset axes in data coordinates
-    # dpin.imshow(dp_dt, cmap='gray', alpha = 0.8)
-    # dpin.axis('off')
-    
-    # satin = ax.inset_axes([360,14,120,10],transform=ax.transData)    # create new inset axes in data coordinates
-    # satin.imshow(sat_dt, cmap = 'gray', alpha = 0.8)
-    # satin.axis('off')
-                      
-    st.pyplot(fig3)    
-       
+
+# Extract Date/Time
+img1_dt = img1[25:45,520:688,:]
+img2_dt = img2[30:50,510:790,:]
+try:
+    local_tz = pytz.timezone(tz)
+    text = pytesseract.image_to_string(img1_dt)
+    dp_datetime = datetime.strptime(text.strip(),'%H:%M / %d-%b-%Y')
+    dp_datetime = dp_datetime.replace(tzinfo=pytz.utc).astimezone(local_tz)
+    dp_datetime = datetime.strftime(dp_datetime,'%d %b %Y %H:%M IST')
+
 except:
-    st.text("Unable to load Radar & Satellite images!")
+    dp_datetime = "NA"
+
+try:
+    text = pytesseract.image_to_string(img2_dt).strip()
+    text = text[:10]+' '+text[20:24]
+    sat_datetime = datetime.strptime(text.strip(),'%d-%m-%Y %H%M')
+    sat_datetime = datetime.strftime(sat_datetime,'%d %b %Y %H:%M IST')
+
+except:
+    sat_datetime = "NA"
+
+
+# Crop
+
+
+img1 = img1[:, 0:500, 0:3]
+x1 = 730
+x2 = x1+41
+y1 = 762
+y2 = y1+41
+img2 = img2[x1:x2,y1:y2,:]
+img2 = resize(img2,(500,500))
+
+mask = np.load('mask_vsk.npy')
+element = np.ones([31,31],np.uint8)
+mask = dilation(mask,element)
+masked = np.where(mask[...,None], img2, 0)
+
+result = img2.copy()
+result[mask>0]=(0,0,0)
+img2_gray = rgb2gray(result)
+img2_gray = inpaint.inpaint_biharmonic(img2_gray,mask)
+img2_gray = filters.gaussian(img2_gray,sigma=1)
+alpha = img2_gray
+
+dpimg = img1
+dp_dt = img1_dt
+sat_dt = img2_dt
+#Plot
+bbox=dict(boxstyle="square", alpha=0.3, color='white')
+fig3, ax = plt.subplots(figsize=[15,15])
+ax.set(xticks=[], yticks=[], title="Visakhapatnam Doppler Radar Image Overlayed with Satellite Image")
+plt.imshow(dpimg)
+plt.imshow(img2_gray, cmap='Blues_r', alpha=alpha*0.8)
+
+plt.annotate('Radar:      '+dp_datetime,(364,14),size=11, color = 'k', fontweight='semibold', bbox=bbox)
+plt.annotate('Satellite:  '+sat_datetime,(364,24),size=11, color = 'k', fontweight='semibold', bbox=bbox) 
+
+# dpin = ax.inset_axes([360,2,70,12],transform=ax.transData)    # create new inset axes in data coordinates
+# dpin.imshow(dp_dt, cmap='gray', alpha = 0.8)
+# dpin.axis('off')
+
+# satin = ax.inset_axes([360,14,120,10],transform=ax.transData)    # create new inset axes in data coordinates
+# satin.imshow(sat_dt, cmap = 'gray', alpha = 0.8)
+# satin.axis('off')
+
+st.pyplot(fig3)    
+       
+#except:
+#    st.text("Unable to load Radar & Satellite images!")
 
 #-------------------------------------------------------
 lat, lon = 17.6744, 83.284
