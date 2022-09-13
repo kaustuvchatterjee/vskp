@@ -7,5 +7,4 @@ pytesseract==0.3.9
 pytz==2022.2
 requests==2.27.1
 scikit_image==0.19.3
-skimage==0.0
 streamlit==1.12.0
