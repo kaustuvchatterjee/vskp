@@ -167,7 +167,7 @@ try:
     dp_datetime = datetime.strftime(dp_datetime,'%d %b %Y %H:%M IST')
 
 #     except:
-        dp_datetime = "NA"
+    dp_datetime = "NA"
 
     try:
         text = pytesseract.image_to_string(img2_dt).strip()
