@@ -159,14 +159,14 @@ try:
     # Extract Date/Time
     img1_dt = img1[25:45,520:688,:]
     img2_dt = img2[30:50,510:790,:]
-    try:
-        local_tz = pytz.timezone(tz)
-        text = pytesseract.image_to_string(img1_dt)
-        dp_datetime = datetime.strptime(text.strip(),'%H:%M / %d-%b-%Y')
-        dp_datetime = dp_datetime.replace(tzinfo=pytz.utc).astimezone(local_tz)
-        dp_datetime = datetime.strftime(dp_datetime,'%d %b %Y %H:%M IST')
+#     try:
+    local_tz = pytz.timezone(tz)
+    text = pytesseract.image_to_string(img1_dt)
+    dp_datetime = datetime.strptime(text.strip(),'%H:%M / %d-%b-%Y')
+    dp_datetime = dp_datetime.replace(tzinfo=pytz.utc).astimezone(local_tz)
+    dp_datetime = datetime.strftime(dp_datetime,'%d %b %Y %H:%M IST')
 
-    except:
+#     except:
         dp_datetime = "NA"
 
     try:
