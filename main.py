@@ -176,6 +176,7 @@ try:
         sat_datetime = datetime.strftime(sat_datetime,'%d %b %Y %H:%M IST')
 
     except:
+        Exception as e: print(e)
         sat_datetime = "NA"
 
 
