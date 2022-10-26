@@ -137,7 +137,8 @@ ax2.yaxis.set_label_position("left")
 plt.grid()
 
       
-monthyearFmt = mdates.DateFormatter('%b %y')
+# monthyearFmt = mdates.DateFormatter('%b %y')
+monthyearFmt = mdates.DateFormatter('%d %b %y')
 ax2.xaxis.set_major_formatter(monthyearFmt)
 plt.autoscale(enable=True, axis='x', tight=True)
 plt.title('Relative Humidity & Precipitation')
