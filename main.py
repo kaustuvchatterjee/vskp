@@ -386,106 +386,102 @@ def getLayer(url, Xpath):
     img = createImageFromTiles(s,l,t,h,w)
     
     return img
-try:
-    # Base Map
-    url = 'https://openweathermap.org/weathermap?basemap=map&cities=false&layer=clouds&lat=17.69&lon=83.2093&zoom=8'
-    Xpath = '//*[@id="map"]/div[1]/div[1]/div[2]/div[2]/*'
-    base_img = getLayer(url, Xpath)
 
-    # # Labels
-    # Xpath = '//*[@id="map"]/div[1]/div[1]/div[3]/div[2]/*'
-    # labels_img = getLayer(url, Xpath)
+# Base Map
+url = 'https://openweathermap.org/weathermap?basemap=map&cities=false&layer=clouds&lat=17.69&lon=83.2093&zoom=8'
+Xpath = '//*[@id="map"]/div[1]/div[1]/div[2]/div[2]/*'
+base_img = getLayer(url, Xpath)
 
-    # Clouds
-    Xpath = "//*[@id='map']/div[1]/div[1]/div[1]/div[2]/*"
-    clouds_img = getLayer(url, Xpath)
+# # Labels
+# Xpath = '//*[@id="map"]/div[1]/div[1]/div[3]/div[2]/*'
+# labels_img = getLayer(url, Xpath)
 
-    # Radar
-    url = 'https://openweathermap.org/weathermap?basemap=map&cities=false&layer=radar&lat=17.69&lon=83.2093&zoom=8'
-    radar_img = getLayer(url, Xpath)
+# Clouds
+Xpath = "//*[@id='map']/div[1]/div[1]/div[1]/div[2]/*"
+clouds_img = getLayer(url, Xpath)
 
-    img = base_img.copy()
-    img.paste(clouds_img, (0,0), clouds_img)
-    img.paste(radar_img, (0,0), radar_img)
-    img = img.convert('RGB')
+# Radar
+url = 'https://openweathermap.org/weathermap?basemap=map&cities=false&layer=radar&lat=17.69&lon=83.2093&zoom=8'
+radar_img = getLayer(url, Xpath)
 
-    left = 672
-    top = 374
-    right = 1272
-    bottom = 774
+img = base_img.copy()
+img.paste(clouds_img, (0,0), clouds_img)
+img.paste(radar_img, (0,0), radar_img)
+img = img.convert('RGB')
 
-    img = img.crop((left, top, right, bottom))
-    # img.save('wmap.jpg')
+left = 672
+top = 374
+right = 1272
+bottom = 774
 
-    api_key = "85d5db5a1265e695a3d4b99399f27d57"
-    base_url = "http://api.openweathermap.org/data/2.5/weather?"
-    city_name = "Visakhapatnam,in"
+img = img.crop((left, top, right, bottom))
+# img.save('wmap.jpg')
 
-    complete_url = base_url + "appid=" + api_key + "&q=" + city_name
-    response = requests.get(complete_url)
-    x = response.json()
+api_key = "85d5db5a1265e695a3d4b99399f27d57"
+base_url = "http://api.openweathermap.org/data/2.5/weather?"
+city_name = "Visakhapatnam,in"
 
-    temp = 'NA'
-    RH = 'NA'
-    pressure = 'NA'
-    wind_speed = 'NA'
-    wind_dir = 'NA'
-    clouds = 'NA'
-    w_desc = 'NA'
+complete_url = base_url + "appid=" + api_key + "&q=" + city_name
+response = requests.get(complete_url)
+x = response.json()
 
-
-
-    if x["cod"] != "404":
+temp = 'NA'
+RH = 'NA'
+pressure = 'NA'
+wind_speed = 'NA'
+wind_dir = 'NA'
+clouds = 'NA'
+w_desc = 'NA'
 
 
-        y = x["main"]
-        temp = y["temp"]
-        temp = np.round(temp-273.15,1)
-        minTemp = np.round((y["temp_min"]-273.15),0)
-        maxTemp = np.round((y["temp_max"]-273.15),0)
 
-        mslp = y["pressure"]
-        RH = y["humidity"]
-
-        z = x["weather"]
-        w_desc = z[0]["description"]
-        w_icon = "https://openweathermap.org/img/wn/"+z[0]["icon"]+"@2x.png"
-        urllib.request.urlretrieve(w_icon, 'wimg.png')
-        wicon = Image.open('wimg.png')
-
-        a = x["wind"]
-        wind_speed = a["speed"]
-        wind_speed = np.round(wind_speed*3.6,1)
-        wind_dir = a["deg"]
-        clouds = x["clouds"]["all"]
-        sunrise = int(x["sys"]["sunrise"])+int(x["timezone"])
-        sunrise = datetime.datetime.utcfromtimestamp(int(sunrise)).strftime('%H:%M')
-        sunset = int(x["sys"]["sunset"])+int(x["timezone"])
-        sunset = datetime.datetime.utcfromtimestamp(int(sunset)).strftime('%H:%M')
-
-    # Embed  in Image
-    font = ImageFont.truetype("OpenSans-Regular.ttf", 14)
-    img = Image.open('wmap.jpg')
-    img.paste(wicon, (0,0), wicon)
-    draw = ImageDraw.Draw(img)
-    draw.text((120, 10),w_desc,(0,0,0),font=font)
-    tmstr = 'Temp:     '+str(temp)+'°C'
-    draw.text((120, 24),tmstr,(0,0,0),font=font)
-    tmstr = 'RH:          '+str(RH)+'%'
-    draw.text((120, 38),tmstr,(0,0,0),font=font)
-    tmstr = 'Wind:      '+str(wind_speed)+' km/h from '+str(wind_dir)+'°'
-    draw.text((120, 52),tmstr,(0,0,0),font=font)
-    tmstr = 'MSLP:     '+str(mslp)+' hPa'
-    draw.text((120, 66),tmstr,(0,0,0),font=font)
-    tmstr = 'Cloud Cover:     '+str(clouds)+'%'
-    draw.text((120, 80),tmstr,(0,0,0),font=font)
-    tmstr = 'Sunrise:     '+str(sunrise)
-    draw.text((120, 94),tmstr,(0,0,0),font=font)
-    tmstr = 'Sunsey:     '+str(sunset)
-    draw.text((120, 108),tmstr,(0,0,0),font=font)
-
-    st.Image(img, caption='Current Weather: Visakhapatnam')
-except:
-    st.text("Unable to load Current Weather!")
+if x["cod"] != "404":
 
 
+    y = x["main"]
+    temp = y["temp"]
+    temp = np.round(temp-273.15,1)
+    minTemp = np.round((y["temp_min"]-273.15),0)
+    maxTemp = np.round((y["temp_max"]-273.15),0)
+
+    mslp = y["pressure"]
+    RH = y["humidity"]
+
+    z = x["weather"]
+    w_desc = z[0]["description"]
+    w_icon = "https://openweathermap.org/img/wn/"+z[0]["icon"]+"@2x.png"
+    urllib.request.urlretrieve(w_icon, 'wimg.png')
+    wicon = Image.open('wimg.png')
+
+    a = x["wind"]
+    wind_speed = a["speed"]
+    wind_speed = np.round(wind_speed*3.6,1)
+    wind_dir = a["deg"]
+    clouds = x["clouds"]["all"]
+    sunrise = int(x["sys"]["sunrise"])+int(x["timezone"])
+    sunrise = datetime.datetime.utcfromtimestamp(int(sunrise)).strftime('%H:%M')
+    sunset = int(x["sys"]["sunset"])+int(x["timezone"])
+    sunset = datetime.datetime.utcfromtimestamp(int(sunset)).strftime('%H:%M')
+
+# Embed  in Image
+font = ImageFont.truetype("OpenSans-Regular.ttf", 14)
+img = Image.open('wmap.jpg')
+img.paste(wicon, (0,0), wicon)
+draw = ImageDraw.Draw(img)
+draw.text((120, 10),w_desc,(0,0,0),font=font)
+tmstr = 'Temp:     '+str(temp)+'°C'
+draw.text((120, 24),tmstr,(0,0,0),font=font)
+tmstr = 'RH:          '+str(RH)+'%'
+draw.text((120, 38),tmstr,(0,0,0),font=font)
+tmstr = 'Wind:      '+str(wind_speed)+' km/h from '+str(wind_dir)+'°'
+draw.text((120, 52),tmstr,(0,0,0),font=font)
+tmstr = 'MSLP:     '+str(mslp)+' hPa'
+draw.text((120, 66),tmstr,(0,0,0),font=font)
+tmstr = 'Cloud Cover:     '+str(clouds)+'%'
+draw.text((120, 80),tmstr,(0,0,0),font=font)
+tmstr = 'Sunrise:     '+str(sunrise)
+draw.text((120, 94),tmstr,(0,0,0),font=font)
+tmstr = 'Sunsey:     '+str(sunset)
+draw.text((120, 108),tmstr,(0,0,0),font=font)
+
+st.Image(img, caption='Current Weather: Visakhapatnam')
