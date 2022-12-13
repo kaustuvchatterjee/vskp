@@ -20,6 +20,191 @@ from datetime import datetime
 import pytz
 import pytesseract
 
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+from PIL import Image, ImageEnhance
+from PIL import ImageFont
+from PIL import ImageDraw
+
+import urllib.request
+import requests, json, datetime
+
+#---------------------------------
+# Current Weather
+def parseData(data):
+
+    attrList = data.split(';')
+    h = attrList[0]
+    h = h.split(':')[1].strip()
+    h = int(h.split('px')[0].strip())
+
+    w = attrList[1]
+    w = w.split(':')[1].strip()
+    w = int(w.split('px')[0].strip())
+
+    l = attrList[2]
+    l = l.split(':')[1].strip()
+    l = int(l.split('px')[0].strip())
+
+    t = attrList[3]
+    t = t.split(':')[1].strip()
+    t = int(t.split('px')[0].strip())
+
+    return [h,w,l,t]
+
+def createImageFromTiles(s, l, t, h, w):
+    # print(s,l,t)
+    min_l = np.min(l)
+    max_l = np.max(l)+w
+    min_t = np.min(t)
+    max_t = np.max(t)+h
+    img = Image.new('RGBA',(max_l, max_t))
+    # print(min_l, max_l, min_t, max_t)
+
+    
+    for i in range(len(s)):
+        
+        urllib.request.urlretrieve(s[i], 'tmp.png')
+        fmg = Image.open('tmp.png')
+        fmg.resize((h,w))
+        # fmg.show()
+        img.paste(fmg,(l[i]-min_l,t[i]-min_t))
+        # img.show()
+        
+    return img
+
+def getLayer(url, Xpath):
+
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("window-size=1920,1080")
+    timeout = 10
+    browser = webdriver.Chrome(options=options)
+    browser.get(url)
+    element_present = EC.visibility_of_all_elements_located((By.XPATH, Xpath))
+    ImageList = WebDriverWait(browser, timeout).until(element_present)
+
+    s = []
+    l = []
+    t = []
+    for element in ImageList:
+
+        src = element.get_attribute('src')
+        data = element.get_attribute('style')
+        # print(data)
+        img_data = parseData(data)
+        l.append(img_data[2])
+        t.append(img_data[3])
+        s.append(src)
+        h = img_data[0]
+        w = img_data[1]
+        
+    img = createImageFromTiles(s,l,t,h,w)
+    
+    return img
+# Base Map
+url = 'https://openweathermap.org/weathermap?basemap=map&cities=false&layer=clouds&lat=17.69&lon=83.2093&zoom=8'
+Xpath = '//*[@id="map"]/div[1]/div[1]/div[2]/div[2]/*'
+base_img = getLayer(url, Xpath)
+
+# # Labels
+# Xpath = '//*[@id="map"]/div[1]/div[1]/div[3]/div[2]/*'
+# labels_img = getLayer(url, Xpath)
+
+# Clouds
+Xpath = "//*[@id='map']/div[1]/div[1]/div[1]/div[2]/*"
+clouds_img = getLayer(url, Xpath)
+
+# Radar
+url = 'https://openweathermap.org/weathermap?basemap=map&cities=false&layer=radar&lat=17.69&lon=83.2093&zoom=8'
+radar_img = getLayer(url, Xpath)
+
+img = base_img.copy()
+img.paste(clouds_img, (0,0), clouds_img)
+img.paste(radar_img, (0,0), radar_img)
+img = img.convert('RGB')
+
+left = 672
+top = 374
+right = 1272
+bottom = 774
+
+img = img.crop((left, top, right, bottom))
+# img.save('wmap.jpg')
+
+api_key = "85d5db5a1265e695a3d4b99399f27d57"
+base_url = "http://api.openweathermap.org/data/2.5/weather?"
+city_name = "Visakhapatnam,in"
+
+complete_url = base_url + "appid=" + api_key + "&q=" + city_name
+response = requests.get(complete_url)
+x = response.json()
+
+temp = 'NA'
+RH = 'NA'
+pressure = 'NA'
+wind_speed = 'NA'
+wind_dir = 'NA'
+clouds = 'NA'
+w_desc = 'NA'
+
+
+
+if x["cod"] != "404":
+ 
+
+    y = x["main"]
+    temp = y["temp"]
+    temp = np.round(temp-273.15,1)
+    minTemp = np.round((y["temp_min"]-273.15),0)
+    maxTemp = np.round((y["temp_max"]-273.15),0)
+ 
+    mslp = y["pressure"]
+    RH = y["humidity"]
+
+    z = x["weather"]
+    w_desc = z[0]["description"]
+    w_icon = "https://openweathermap.org/img/wn/"+z[0]["icon"]+"@2x.png"
+    urllib.request.urlretrieve(w_icon, 'wimg.png')
+    wicon = Image.open('wimg.png')
+    
+    a = x["wind"]
+    wind_speed = a["speed"]
+    wind_speed = np.round(wind_speed*3.6,1)
+    wind_dir = a["deg"]
+    clouds = x["clouds"]["all"]
+    sunrise = int(x["sys"]["sunrise"])+int(x["timezone"])
+    sunrise = datetime.datetime.utcfromtimestamp(int(sunrise)).strftime('%H:%M')
+    sunset = int(x["sys"]["sunset"])+int(x["timezone"])
+    sunset = datetime.datetime.utcfromtimestamp(int(sunset)).strftime('%H:%M')
+
+# Embed  in Image
+font = ImageFont.truetype("OpenSans-Regular.ttf", 14)
+img = Image.open('wmap.jpg')
+img.paste(wicon, (0,0), wicon)
+draw = ImageDraw.Draw(img)
+draw.text((120, 10),w_desc,(0,0,0),font=font)
+tmstr = 'Temp:     '+str(temp)+'°C'
+draw.text((120, 24),tmstr,(0,0,0),font=font)
+tmstr = 'RH:          '+str(RH)+'%'
+draw.text((120, 38),tmstr,(0,0,0),font=font)
+tmstr = 'Wind:      '+str(wind_speed)+' km/h from '+str(wind_dir)+'°'
+draw.text((120, 52),tmstr,(0,0,0),font=font)
+tmstr = 'MSLP:     '+str(mslp)+' hPa'
+draw.text((120, 66),tmstr,(0,0,0),font=font)
+tmstr = 'Cloud Cover:     '+str(clouds)+'%'
+draw.text((120, 80),tmstr,(0,0,0),font=font)
+tmstr = 'Sunrise:     '+str(sunrise)
+draw.text((120, 94),tmstr,(0,0,0),font=font)
+tmstr = 'Sunsey:     '+str(sunset)
+draw.text((120, 108),tmstr,(0,0,0),font=font)
+
+st.Image(img, caption='Current Weather: Visakhapatnam)
+
 #---------------------------------
 def read_data():
     df = pd.read_csv('vskp_data.csv')
