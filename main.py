@@ -203,7 +203,7 @@ draw.text((120, 94),tmstr,(0,0,0),font=font)
 tmstr = 'Sunsey:     '+str(sunset)
 draw.text((120, 108),tmstr,(0,0,0),font=font)
 
-st.Image(img, caption='Current Weather: Visakhapatnam)
+st.Image(img, caption='Current Weather: Visakhapatnam')
 
 #---------------------------------
 def read_data():
