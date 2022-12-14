@@ -363,7 +363,7 @@ def getLayer(url, Xpath):
     options.add_argument("--headless")
     options.add_argument("window-size=1920,1080")
     timeout = 10
-    browser = webdriver.Chrome(options=options)
+    browser = webdriver.Chrome(executable_path="/usr/bin/google-chrome", options=options)
     browser.get(url)
     element_present = EC.visibility_of_all_elements_located((By.XPATH, Xpath))
     ImageList = WebDriverWait(browser, timeout).until(element_present)
