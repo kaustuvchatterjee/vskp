@@ -360,7 +360,7 @@ def createImageFromTiles(s, l, t, h, w):
 def getLayer(url, Xpath):
 
     options = Options()
-    options.add_argument("--headless")
+#     options.add_argument("--headless")
     options.add_argument("window-size=1920,1080")
     timeout = 10
     browser = webdriver.Chrome(executable_path="/usr/bin/google-chrome", options=options)
