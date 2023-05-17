@@ -248,7 +248,7 @@ except:
 #-------------------------------------------------------
 lat, lon = 17.6744, 83.284
 
-times = pd.date_range('2019-01-01 00:00:00', '2020-01-01', closed='left',
+times = pd.date_range('2019-01-01 00:00:00', '2020-01-01', inclusive='left',
                       freq='H', tz=tz)
 solpos = solarposition.get_solarposition(times, lat, lon)
 # remove nighttime
