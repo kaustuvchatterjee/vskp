@@ -47,7 +47,7 @@ df['date'] = pd.to_datetime(df['date'])
 
 # Update data frame
 # date
-date = date.today()
+date = date.today().strftime('%Y-%m-%d %H:%M:%S')
 
 # maxTemp
 if is_number(values[0]):
