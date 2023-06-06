@@ -269,7 +269,7 @@ lws = [4,4,4,8]
 curdate = pd.Timestamp.today()
 curdate = str(curdate)[0:10]
 i=0
-for date in pd.to_datetime(['2022-03-21', '2022-06-21', '2022-12-21',curdate]):
+for date in pd.to_datetime(['2023-03-21', '2023-06-21', '2023-12-21',curdate]):
     times = pd.date_range(date, date+pd.Timedelta('24h'), freq='5min', tz=tz)
     solpos = solarposition.get_solarposition(times, lat, lon)
     solpos = solpos.loc[solpos['apparent_elevation'] > 0, :]
