@@ -74,7 +74,8 @@ if is_number(values[4]):
 elif values[4] == 'NIL':
     precip = 0
 print(precip)    
-df = df.append({'date':date.strftime('%Y-%m-%d %H:%M:%S'), 'maxTemp':maxTemp, 'minTemp':minTemp, 'mornRH':mornRH, 'eveRH':eveRH, 'relHum':meanRH}, ignore_index=True)
+# df = df.append({'date':date.strftime('%Y-%m-%d %H:%M:%S'), 'maxTemp':maxTemp, 'minTemp':minTemp, 'mornRH':mornRH, 'eveRH':eveRH, 'relHum':meanRH}, ignore_index=True)
+pd.concat([df,{'date':date.strftime('%Y-%m-%d %H:%M:%S'), 'maxTemp':maxTemp, 'minTemp':minTemp, 'mornRH':mornRH, 'eveRH':eveRH, 'relHum':meanRH}], ignore_index=True)
 if df[df['date']== date-timedelta(days=1)]['date'].count()==1:
     df.loc[df['date']== date-timedelta(days=1), 'rainFall'] =  precip
 
