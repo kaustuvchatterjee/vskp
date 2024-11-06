@@ -315,7 +315,7 @@ fg = resize(fg,(1460,1460))
 
 fig4, ax = plt.subplots(figsize=[12,12])
 ax.set(xticks=[], yticks=[], title="Sun Path and Position on "+curtime.strftime('%d %b %Y')+" at "+curtime.strftime('%H:%M'))
-
+ax.spines['polar'].set_visible(False)
 plt.imshow(bg)
 plt.imshow(fg)
 st.pyplot(fig4) 
